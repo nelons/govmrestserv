@@ -22,13 +22,13 @@ make build.windows
 
 The application supports the following command line parameters:
 
--help -> displays the command line options
--test "vc sdk url" "username" "password" -> connects to the URL and prints out information about what can be found. This does not start the web server.
--app -> runs the application from the command line. 
--service install -> installs the application as a service.
--service uninstall -> removes the service.
--service start -> starts the service
--service stop -> stops.
+-help -> displays the command line options  
+-test "vc sdk url" "username" "password" -> connects to the URL and prints out information about what can be found. This does not start the web server.  
+-app -> runs the application from the command line.  
+-service install -> installs the application as a service.  
+-service uninstall -> removes the service.  
+-service start -> starts the service  
+-service stop -> stops.  
 
 If not command line parameters are provided, or "-app" then the application will start a blocking web server, Ctrl-C or equivalent to exit.
 
