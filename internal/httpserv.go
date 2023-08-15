@@ -2,9 +2,11 @@ package internal
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"log"
+	"math/rand"
 	"net/http"
 	"net/url"
 	"os"
@@ -12,25 +14,56 @@ import (
 
 	"github.com/go-openapi/loads"
 	"github.com/go-openapi/runtime/middleware"
+	"github.com/jessevdk/go-flags"
 	"github.com/nelons/vsphere-rest-server/pkg/swagger/server/models"
 	"github.com/nelons/vsphere-rest-server/pkg/swagger/server/restapi"
 	"github.com/nelons/vsphere-rest-server/pkg/swagger/server/restapi/operations"
+	"github.com/vmware/govmomi/object"
+	"github.com/vmware/govmomi/vim25/mo"
 )
 
-type json_wrapper struct {
-	TypeName string
-	Object   any
+type Configuration struct {
+	Port             int    `json:"port"`
+	Certificate_file string `json:"certificate_file"`
+	Certificate_key  string `json:"certificate_key"`
 }
 
-func InitialiseServer() {
-	cert_exists := file_exists("cert.cer")
-	key_exists := file_exists("cert.key")
+var server *restapi.Server
+
+func InitialiseServer() error {
+	var config Configuration
+
+	// Load the configuration
+	if file_exists("config.json") {
+		configFile, err := os.Open("config.json")
+		if err != nil {
+			fmt.Println(err.Error())
+
+		} else {
+			defer configFile.Close()
+			jsonParser := json.NewDecoder(configFile)
+			jsonParser.Decode(&config)
+
+		}
+	}
+
+	if config.Port == 0 {
+		config.Port = 8443
+	}
+
+	cert_exists := file_exists(config.Certificate_file)
+	key_exists := file_exists(config.Certificate_key)
 
 	if !cert_exists || !key_exists {
+		cert_exists := file_exists("cert.cer")
+		key_exists := file_exists("cert.key")
+
 		if cert_exists {
 			err := os.Remove("cert.cer")
 			if err != nil {
 				log.Fatal("Could not remove certificate file.")
+				return err
+
 			}
 			cert_exists = false
 		}
@@ -39,76 +72,265 @@ func InitialiseServer() {
 			err := os.Remove("cert.key")
 			if err != nil {
 				log.Fatal("Could not remove private key.")
+				return err
+
 			}
 			key_exists = false
 		}
+
+		if !cert_exists && !key_exists {
+			generate_selfsigned_certificate()
+			config.Certificate_file = "cert.cer"
+			config.Certificate_key = "cert.key"
+
+			// TODO: save out JSON
+
+		} else {
+			return errors.New("Failed to generate self-signed certificate.")
+
+		}
 	}
 
-	if !cert_exists && !key_exists {
-		generate_selfsigned_certificate()
-	}
-}
-
-func StartServer() {
 	swaggerSpec, err := loads.Analyzed(restapi.SwaggerJSON, "")
 	if err != nil {
 		log.Fatalln(err)
+		return err
 	}
 
 	api := operations.NewVSphereAPI(swaggerSpec)
-	server := restapi.NewServer(api)
-	defer func() {
-		if err := server.Shutdown(); err != nil {
-			log.Fatalln(err)
-		}
-		log.Println("Server shutdown !")
-	}()
-
-	server.TLSPort = 8443
-	server.TLSCertificate = "cert.cer"
-	server.TLSCertificateKey = "cert.key"
-	server.TLSCACertificate = ""
 
 	api.SessionRegisterHandler = operations.SessionRegisterHandlerFunc(post_session_register)
 	api.SessionListHandler = operations.SessionListHandlerFunc(get_session_list)
 	api.VSphereConnectHandler = operations.VSphereConnectHandlerFunc(post_vsphere_connect)
 	api.VSphereListConnectionsHandler = operations.VSphereListConnectionsHandlerFunc(get_vSphere_list)
+
+	// VMs
 	api.VSphereGetAllVMSummaryHandler = operations.VSphereGetAllVMSummaryHandlerFunc(get_vsphere_get_vms)
 	api.VSphereGetVMByNameHandler = operations.VSphereGetVMByNameHandlerFunc(get_vsphere_get_vm_byname)
 	api.VSphereGetVMByMoRefHandler = operations.VSphereGetVMByMoRefHandlerFunc(get_vsphere_get_vm_bymoref)
-	api.VSphereGetAllHostsSummaryHandler = operations.VSphereGetAllHostsSummaryHandlerFunc(get_vsphere_get_host)
+	api.VSphereChangeVMPowerStateHandler = operations.VSphereChangeVMPowerStateHandlerFunc(post_vsphere_vm_power)
 
+	// Hosts
+	api.VSphereGetAllHostsSummaryHandler = operations.VSphereGetAllHostsSummaryHandlerFunc(get_vsphere_get_host)
+	api.VSphereGetHostByNameHandler = operations.VSphereGetHostByNameHandlerFunc(get_vsphere_get_host_byname)
+	api.VSphereGetHostByMoRefHandler = operations.VSphereGetHostByMoRefHandlerFunc(get_vsphere_get_host_byref)
+
+	// Datastores
+	api.VSphereGetAllDatastoresHandler = operations.VSphereGetAllDatastoresHandlerFunc(get_vsphere_get_datastore)
+
+	// Networks
+	api.VSphereGetAllNetworksHandler = operations.VSphereGetAllNetworksHandlerFunc(get_vsphere_get_network)
+
+	// vCenter Stuff
+	api.VSphereGetAllDatacentersHandler = operations.VSphereGetAllDatacentersHandlerFunc(get_vsphere_get_datacenter)
+	api.VSphereGetAllClustersHandler = operations.VSphereGetAllClustersHandlerFunc(get_vsphere_get_cluster)
+	api.VSphereGetAllResourcePoolHandler = operations.VSphereGetAllResourcePoolHandlerFunc(get_vsphere_get_resourcepool)
+	api.VSphereGetAllStoragePodsHandler = operations.VSphereGetAllStoragePodsHandlerFunc(get_vsphere_get_storagepod)
+
+	server = restapi.NewServer(api)
+
+	server.TLSPort = config.Port
+	server.TLSCertificate = flags.Filename(config.Certificate_file)
+	server.TLSCertificateKey = flags.Filename(config.Certificate_key)
+	server.TLSCACertificate = ""
+	return nil
+}
+
+func StartServer() {
 	if err := server.Serve(); err != nil {
 		log.Fatalln(err)
 	}
 }
 
-func TestServer() {
+func ShutdownServer() {
+	err := server.Shutdown()
+	if err != nil {
+		log.Fatalln(err)
+	}
+}
+
+func Test_PrintObject(obj any) {
+	prettyJSON, err := json.MarshalIndent(obj, "", "  ")
+	if err == nil {
+		fmt.Printf("%v\n", string(prettyJSON))
+	}
+}
+
+func TestServer(vcenter_sdk, username, password string) {
 	// Testing, connect to a vcenter.
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	client, err := vcenter_login(ctx, "https://127.0.0.1:8005/sdk", "user", "pass", true)
+	client, err := vcenter_login(ctx, vcenter_sdk, username, password, true)
 	if err != nil {
 		return
 	}
 
-	vms, err := vcenter_getvm_byname(client, ctx, "mx-wp-db16-dr")
-	if err == nil {
-		for _, vm := range vms {
-			fmt.Printf("Found VM by Name: '%v'\n", vm.Name)
-		}
-	}
+	fmt.Printf("Connected to %v.\n", vcenter_sdk)
+	about := client.ServiceContent.About
+	Test_PrintObject(about)
 
-	items, err := vcenter_getvm_bymoref(client, ctx, "vm-8567")
-	if err == nil {
-		for _, vm := range items {
-			fmt.Printf("Found VM by Ref: '%v'\n", vm.Name)
+	// fork code path between ESXi Host and vCenter
+	// as some entities below are only applicable to vCenter.
+	if about.ApiType == "VirtualCenter" {
+		fmt.Println("VirtualCenter detected.")
+
+		// Try and get datacenters
+		fmt.Println("Datacenters:")
+		var dcs []mo.Datacenter
+		err = vcenter_get_objects(client, ctx, "Datacenter", []string{}, &dcs)
+		if err == nil {
+			for _, dc := range dcs {
+				fmt.Printf(": %v\n", dc.Name)
+			}
 		}
+
+		// Compute Clusters
+		fmt.Println("ClusterComputeResource:")
+		var ccr []mo.ClusterComputeResource
+		err = vcenter_get_objects(client, ctx, "ClusterComputeResource", []string{}, &ccr)
+		if err == nil {
+			for _, cluster := range ccr {
+				fmt.Printf(": %v\n", cluster.Name)
+
+				// TODO: get hosts for this cluster
+			}
+		}
+
+		// Resource Pools
+		fmt.Println("Resource Pools:")
+		var rps []mo.ResourcePool
+		err = vcenter_get_objects(client, ctx, "ResourcePool", []string{}, &rps)
+		if err == nil {
+			for _, rp := range rps {
+				fmt.Printf(": %v\n", rp.Name)
+			}
+		}
+
+		// StoragePods
+		fmt.Println("StoragePods:")
+		var pods []mo.StoragePod
+		err = vcenter_get_objects(client, ctx, "StoragePod", []string{}, &pods)
+		if err == nil {
+			for _, pod := range pods {
+				fmt.Printf(": %v\n", pod.Name)
+
+				fmt.Printf("-- %v\n", pod.ChildType)
+
+				for _, ds := range pod.ChildEntity {
+					fmt.Printf("-- %v\n", ds.String())
+				}
+			}
+		}
+
 	} else {
-		fmt.Printf("Error: %v\n", err.Error())
+		fmt.Println("ESX Host detected.")
+
+		// ComputeResource ?
+		fmt.Println("ComputeResource:")
+		var crs []mo.ClusterComputeResource
+		err = vcenter_get_objects(client, ctx, "ComputeResource", []string{}, &crs)
+		if err == nil {
+			for _, cluster := range crs {
+				fmt.Printf(": %v\n", cluster.Name)
+			}
+		}
 	}
 
+	// Datastores
+	fmt.Println("Datastores:")
+	var dss []mo.Datastore
+	err = vcenter_get_objects(client, ctx, "Datastore", []string{}, &dss)
+	if err == nil {
+		for _, ds := range dss {
+			fmt.Printf(": %v\n", ds.Name)
+		}
+	}
+
+	// Networks
+	fmt.Println("Networks:")
+	var networks []mo.Network
+	err = vcenter_get_objects(client, ctx, "Network", []string{}, &networks)
+	if err == nil {
+		for _, network := range networks {
+			fmt.Printf(": %v\n", network.Name)
+		}
+	}
+
+	// Get all the hosts
+	var hosts []mo.HostSystem
+	err = vcenter_get_objects(client, ctx, "HostSystem", []string{}, &hosts)
+	if err == nil {
+		fmt.Printf("Found %v hosts.\n", len(hosts))
+
+		for _, host := range hosts {
+			fmt.Printf("Host: %v\n", host.Name)
+		}
+	}
+
+	// Get the list of VMs.
+	//all_vms, err := vcenter_getvms_summary(client, ctx)
+	var all_vms []mo.VirtualMachine
+	err = vcenter_get_objects(client, ctx, ObjectType_VirtualMachine, []string{"summary"}, &all_vms)
+	if err == nil {
+		// Pick a VM at random to get by name
+		max_vms := len(all_vms)
+		if max_vms > 0 {
+			fmt.Printf("Retrieved %v VMs.\n", max_vms)
+
+			vm_position := rand.Intn(max_vms - 1)
+			vm := all_vms[vm_position]
+
+			fmt.Printf("Looking for a VM with the name '%v'\n", vm.Summary.Config.Name)
+
+			var vms []mo.VirtualMachine
+			err = vcenter_get_object_byname(client, ctx, ObjectType_VirtualMachine, vm.Summary.Config.Name, []string{"Self"}, &vms)
+			if err == nil {
+				for _, item := range vms {
+					fmt.Printf("Found VM by Name: '%v', the reference is '%v'\n", vm.Summary.Config.Name, item.Self.Value)
+				}
+
+			} else {
+				fmt.Printf("Error getting VM by name: %v\n", err.Error())
+
+			}
+
+			// Pick a VM at random to get by reference
+			vm_position = rand.Intn(max_vms - 1)
+			vm = all_vms[vm_position]
+
+			fmt.Printf("Looking for a VM with the reference '%v'\n", vm.Self.Value)
+			vms = nil
+			err = vcenter_get_object_byref(client, ctx, ObjectType_VirtualMachine, vm.Self.Value, []string{"summary"}, &vms)
+			if err == nil {
+				for _, item := range vms {
+					fmt.Printf("Found VM by Ref: '%v', the name is '%v'\n", vm.Self.Value, item.Summary.Config.Name)
+				}
+
+			} else {
+				fmt.Printf("Error getting VM by reference: %v\n", err.Error())
+
+			}
+
+			mobj := object.NewVirtualMachine(client, vm.Self)
+			power_state, err := mobj.PowerState(ctx)
+			if err == nil {
+				fmt.Printf("Current power state: %v\n", power_state)
+
+				if power_state == "poweredOff" {
+					mobj.PowerOn(ctx)
+
+				} else if power_state == "poweredOn" {
+					mobj.PowerOff(ctx)
+
+				}
+			}
+		}
+
+	} else {
+		fmt.Println("Failed to get Virtual Machines: " + err.Error())
+
+	}
 }
 
 func post_session_register(user operations.SessionRegisterParams) middleware.Responder {
@@ -242,17 +464,6 @@ func validate_request(request *http.Request, token string, target string) (*vcen
 
 	return vc, nil
 }
-
-/*func write_raw_collection(items []any) []interface{} {
-	out := make([]interface{}, len(items))
-	i := 0
-	for _, vm := range items {
-		out[i] = &vm
-		i++
-	}
-
-	return out
-}*/
 
 func create_badrequesterror(msg string) models.BadRequestError {
 	var body models.BadRequestError

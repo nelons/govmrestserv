@@ -91,9 +91,9 @@ license:
 # ------------------------------------------------------
 .PHONY: build build.exe build.update build.full
 
-build: build.update build.exe
+build.windows: build.update build.exe
 
-build.full: depend build
+build.full.windows: depend build.windows
 
 build.update:
 	$(GO) get ./internal

@@ -10,8 +10,6 @@ import (
 	"net/url"
 	golangswaggerpaths "path"
 	"strings"
-
-	"github.com/go-openapi/swag"
 )
 
 // VSphereGetVMByNameURL generates an URL for the v sphere get VM by name operation
@@ -19,7 +17,7 @@ type VSphereGetVMByNameURL struct {
 	Vcenter string
 	Vmname  string
 
-	Raw *bool
+	Props *string
 
 	_basePath string
 	// avoid unkeyed usage
@@ -66,12 +64,12 @@ func (o *VSphereGetVMByNameURL) Build() (*url.URL, error) {
 
 	qs := make(url.Values)
 
-	var rawQ string
-	if o.Raw != nil {
-		rawQ = swag.FormatBool(*o.Raw)
+	var propsQ string
+	if o.Props != nil {
+		propsQ = *o.Props
 	}
-	if rawQ != "" {
-		qs.Set("raw", rawQ)
+	if propsQ != "" {
+		qs.Set("props", propsQ)
 	}
 
 	_result.RawQuery = qs.Encode()

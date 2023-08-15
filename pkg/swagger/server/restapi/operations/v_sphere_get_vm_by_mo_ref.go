@@ -30,7 +30,7 @@ func NewVSphereGetVMByMoRef(ctx *middleware.Context, handler VSphereGetVMByMoRef
 }
 
 /*
-	VSphereGetVMByMoRef swagger:route GET /vsphere/{vcenter}/vm/moref/{moref} vSphereGetVmByMoRef
+	VSphereGetVMByMoRef swagger:route GET /vsphere/{vcenter}/vm/ref/{moref} vSphereGetVmByMoRef
 
 Retrieve a VM from a vCenter Server/ESXi host by it's Managed Object Reference.
 */

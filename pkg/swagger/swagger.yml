@@ -57,11 +57,19 @@ parameters:
     required: true
     description: The name of the virtual machine
 
-  RawOutputToggle:
-    name: raw
+  HostName:
+    name: hostname
+    in: path
+    type: string
+    required: true
+    description: The name of the ESXi host
+
+  SOAPProperties:
+    name: props
     in: query
+    type: string
     required: false
-    type: boolean
+    description: A comma-delimited list of the properties to retrieve from the VM. This is case-sensitive to the properties in the SOAP object.
 
 responses:
   ObjectCollectionResponse:
@@ -273,14 +281,14 @@ paths:
         - $ref: '#/parameters/VRSToken'
         - $ref: '#/parameters/vCenter'
         - $ref: '#/parameters/VirtualMachineName'
-        - $ref: '#/parameters/RawOutputToggle'
+        - $ref: '#/parameters/SOAPProperties'
       responses:
         '200':
           $ref: '#/responses/ObjectCollectionResponse'
         '400':
           $ref: '#/responses/GeneralFailureResponse'
         
-  /vsphere/{vcenter}/vm/moref/{moref}:
+  /vsphere/{vcenter}/vm/ref/{moref}:
     get:
       summary: Retrieve a VM from a vCenter Server/ESXi host by it's Managed Object Reference.
       operationId: vSphereGetVMByMoRef
@@ -288,14 +296,34 @@ paths:
         - $ref: '#/parameters/VRSToken'
         - $ref: '#/parameters/vCenter'
         - $ref: '#/parameters/ManagedReference'
-        - name: raw
-          in: query
-          required: false
-          type: boolean
+        - $ref: '#/parameters/SOAPProperties'        
       responses:
         '200':
           $ref: '#/responses/ObjectCollectionResponse'
+        '400':
+          $ref: '#/responses/GeneralFailureResponse'
 
+  /vsphere/{vcenter}/vm/{moref}/power:
+    post:
+      summary: Power actions on the VM.
+      operationId: vSphereChangeVMPowerState
+      parameters:
+        - $ref: '#/parameters/VRSToken'
+        - $ref: '#/parameters/vCenter'        
+        - $ref: '#/parameters/ManagedReference'
+        - name: state
+          in: query
+          required: true
+          description: The desired power state.
+          type: string
+          enum: [
+            on,
+            off,
+            standby            
+          ]
+      responses:
+        '200':
+          description: The power state change task has been initiated.
         '400':
           $ref: '#/responses/GeneralFailureResponse'
 
@@ -303,6 +331,114 @@ paths:
     get:
       summary: Gets the hosts found at the endpoint.
       operationId: vSphereGetAllHostsSummary
+      parameters:
+        - $ref: '#/parameters/VRSToken'
+        - $ref: '#/parameters/vCenter'
+      responses:
+        '200':
+          $ref: '#/responses/ObjectCollectionResponse'
+        '400':
+          $ref: '#/responses/GeneralFailureResponse'
+
+  /vsphere/{vcenter}/host/name/{hostname}:
+    get:
+      summary: Retrieve full details from a Host by the name of the host.
+      operationId: vSphereGetHostByName
+      parameters:
+        - $ref: '#/parameters/VRSToken'
+        - $ref: '#/parameters/vCenter'
+        - $ref: '#/parameters/HostName'
+        - $ref: '#/parameters/SOAPProperties'
+      responses:
+        '200':
+          $ref: '#/responses/ObjectCollectionResponse'
+        '400':
+          $ref: '#/responses/GeneralFailureResponse'
+
+  /vsphere/{vcenter}/host/ref/{moref}:
+    get:
+      summary: Retrieve full details from a Host by it's Managed Object Reference.
+      operationId: vSphereGetHostByMoRef
+      parameters:
+        - $ref: '#/parameters/VRSToken'
+        - $ref: '#/parameters/vCenter'
+        - $ref: '#/parameters/ManagedReference'
+        - $ref: '#/parameters/SOAPProperties'        
+      responses:
+        '200':
+          $ref: '#/responses/ObjectCollectionResponse'
+        '400':
+          $ref: '#/responses/GeneralFailureResponse'
+
+  /vsphere/{vcenter}/datastore:
+    get:
+      summary: Get a list of datastores
+      operationId: vSphereGetAllDatastores
+      parameters:
+        - $ref: '#/parameters/VRSToken'
+        - $ref: '#/parameters/vCenter'
+      responses:
+        '200':
+          $ref: '#/responses/ObjectCollectionResponse'
+        '400':
+          $ref: '#/responses/GeneralFailureResponse'
+
+  /vsphere/{vcenter}/network:
+    get:
+      summary: Gets a list of networks
+      operationId: vSphereGetAllNetworks
+      parameters:
+        - $ref: '#/parameters/VRSToken'
+        - $ref: '#/parameters/vCenter'
+      responses:
+        '200':
+          $ref: '#/responses/ObjectCollectionResponse'
+        '400':
+          $ref: '#/responses/GeneralFailureResponse'
+
+  /vsphere/{vcenter}/datacenter:
+    get:
+      summary: Gets the datacenters.
+      operationId: vSphereGetAllDatacenters
+      parameters:
+        - $ref: '#/parameters/VRSToken'
+        - $ref: '#/parameters/vCenter'
+      responses:
+        '200':
+          $ref: '#/responses/ObjectCollectionResponse'
+        '400':
+          $ref: '#/responses/GeneralFailureResponse'
+
+  /vsphere/{vcenter}/cluster:
+    get:
+      summary: Gets the hosts found at the endpoint.
+      operationId: vSphereGetAllClusters
+      parameters:
+        - $ref: '#/parameters/VRSToken'
+        - $ref: '#/parameters/vCenter'
+      responses:
+        '200':
+          $ref: '#/responses/ObjectCollectionResponse'
+        '400':
+          $ref: '#/responses/GeneralFailureResponse'
+
+  /vsphere/{vcenter}/storagepod:
+    get:
+      summary: Gets the hosts found at the endpoint.
+      operationId: vSphereGetAllStoragePods
+      parameters:
+        - $ref: '#/parameters/VRSToken'
+        - $ref: '#/parameters/vCenter'
+      responses:
+        '200':
+          $ref: '#/responses/ObjectCollectionResponse'
+        '400':
+          $ref: '#/responses/GeneralFailureResponse'
+
+  /vsphere/{vcenter}/resourcepool:
+    get:
+      summary: Gets the hosts found at the endpoint.
+      operationId: vSphereGetAllResourcePool
       parameters:
         - $ref: '#/parameters/VRSToken'
         - $ref: '#/parameters/vCenter'

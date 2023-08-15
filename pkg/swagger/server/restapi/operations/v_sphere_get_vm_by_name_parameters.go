@@ -12,7 +12,6 @@ import (
 	"github.com/go-openapi/runtime"
 	"github.com/go-openapi/runtime/middleware"
 	"github.com/go-openapi/strfmt"
-	"github.com/go-openapi/swag"
 	"github.com/go-openapi/validate"
 )
 
@@ -38,10 +37,10 @@ type VSphereGetVMByNameParams struct {
 	  In: header
 	*/
 	VRSToken string
-	/*
+	/*A comma-delimited list of the properties to retrieve from the VM.
 	  In: query
 	*/
-	Raw *bool
+	Props *string
 	/*The nicename for the connection.
 	  Required: true
 	  In: path
@@ -69,8 +68,8 @@ func (o *VSphereGetVMByNameParams) BindRequest(r *http.Request, route *middlewar
 		res = append(res, err)
 	}
 
-	qRaw, qhkRaw, _ := qs.GetOK("raw")
-	if err := o.bindRaw(qRaw, qhkRaw, route.Formats); err != nil {
+	qProps, qhkProps, _ := qs.GetOK("props")
+	if err := o.bindProps(qProps, qhkProps, route.Formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -109,8 +108,8 @@ func (o *VSphereGetVMByNameParams) bindVRSToken(rawData []string, hasKey bool, f
 	return nil
 }
 
-// bindRaw binds and validates parameter Raw from query.
-func (o *VSphereGetVMByNameParams) bindRaw(rawData []string, hasKey bool, formats strfmt.Registry) error {
+// bindProps binds and validates parameter Props from query.
+func (o *VSphereGetVMByNameParams) bindProps(rawData []string, hasKey bool, formats strfmt.Registry) error {
 	var raw string
 	if len(rawData) > 0 {
 		raw = rawData[len(rawData)-1]
@@ -122,12 +121,7 @@ func (o *VSphereGetVMByNameParams) bindRaw(rawData []string, hasKey bool, format
 	if raw == "" { // empty values pass all other validations
 		return nil
 	}
-
-	value, err := swag.ConvertBool(raw)
-	if err != nil {
-		return errors.InvalidType("raw", "query", "bool", raw)
-	}
-	o.Raw = &value
+	o.Props = &raw
 
 	return nil
 }

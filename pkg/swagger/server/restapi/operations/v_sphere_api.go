@@ -48,14 +48,41 @@ func NewVSphereAPI(spec *loads.Document) *VSphereAPI {
 		SessionRegisterHandler: SessionRegisterHandlerFunc(func(params SessionRegisterParams) middleware.Responder {
 			return middleware.NotImplemented("operation SessionRegister has not yet been implemented")
 		}),
+		VSphereChangeVMPowerStateHandler: VSphereChangeVMPowerStateHandlerFunc(func(params VSphereChangeVMPowerStateParams) middleware.Responder {
+			return middleware.NotImplemented("operation VSphereChangeVMPowerState has not yet been implemented")
+		}),
 		VSphereConnectHandler: VSphereConnectHandlerFunc(func(params VSphereConnectParams) middleware.Responder {
 			return middleware.NotImplemented("operation VSphereConnect has not yet been implemented")
+		}),
+		VSphereGetAllClustersHandler: VSphereGetAllClustersHandlerFunc(func(params VSphereGetAllClustersParams) middleware.Responder {
+			return middleware.NotImplemented("operation VSphereGetAllClusters has not yet been implemented")
+		}),
+		VSphereGetAllDatacentersHandler: VSphereGetAllDatacentersHandlerFunc(func(params VSphereGetAllDatacentersParams) middleware.Responder {
+			return middleware.NotImplemented("operation VSphereGetAllDatacenters has not yet been implemented")
+		}),
+		VSphereGetAllDatastoresHandler: VSphereGetAllDatastoresHandlerFunc(func(params VSphereGetAllDatastoresParams) middleware.Responder {
+			return middleware.NotImplemented("operation VSphereGetAllDatastores has not yet been implemented")
 		}),
 		VSphereGetAllHostsSummaryHandler: VSphereGetAllHostsSummaryHandlerFunc(func(params VSphereGetAllHostsSummaryParams) middleware.Responder {
 			return middleware.NotImplemented("operation VSphereGetAllHostsSummary has not yet been implemented")
 		}),
+		VSphereGetAllNetworksHandler: VSphereGetAllNetworksHandlerFunc(func(params VSphereGetAllNetworksParams) middleware.Responder {
+			return middleware.NotImplemented("operation VSphereGetAllNetworks has not yet been implemented")
+		}),
+		VSphereGetAllResourcePoolHandler: VSphereGetAllResourcePoolHandlerFunc(func(params VSphereGetAllResourcePoolParams) middleware.Responder {
+			return middleware.NotImplemented("operation VSphereGetAllResourcePool has not yet been implemented")
+		}),
+		VSphereGetAllStoragePodsHandler: VSphereGetAllStoragePodsHandlerFunc(func(params VSphereGetAllStoragePodsParams) middleware.Responder {
+			return middleware.NotImplemented("operation VSphereGetAllStoragePods has not yet been implemented")
+		}),
 		VSphereGetAllVMSummaryHandler: VSphereGetAllVMSummaryHandlerFunc(func(params VSphereGetAllVMSummaryParams) middleware.Responder {
 			return middleware.NotImplemented("operation VSphereGetAllVMSummary has not yet been implemented")
+		}),
+		VSphereGetHostByMoRefHandler: VSphereGetHostByMoRefHandlerFunc(func(params VSphereGetHostByMoRefParams) middleware.Responder {
+			return middleware.NotImplemented("operation VSphereGetHostByMoRef has not yet been implemented")
+		}),
+		VSphereGetHostByNameHandler: VSphereGetHostByNameHandlerFunc(func(params VSphereGetHostByNameParams) middleware.Responder {
+			return middleware.NotImplemented("operation VSphereGetHostByName has not yet been implemented")
 		}),
 		VSphereGetVMByMoRefHandler: VSphereGetVMByMoRefHandlerFunc(func(params VSphereGetVMByMoRefParams) middleware.Responder {
 			return middleware.NotImplemented("operation VSphereGetVMByMoRef has not yet been implemented")
@@ -106,12 +133,30 @@ type VSphereAPI struct {
 	SessionListHandler SessionListHandler
 	// SessionRegisterHandler sets the operation handler for the session register operation
 	SessionRegisterHandler SessionRegisterHandler
+	// VSphereChangeVMPowerStateHandler sets the operation handler for the v sphere change VM power state operation
+	VSphereChangeVMPowerStateHandler VSphereChangeVMPowerStateHandler
 	// VSphereConnectHandler sets the operation handler for the v sphere connect operation
 	VSphereConnectHandler VSphereConnectHandler
+	// VSphereGetAllClustersHandler sets the operation handler for the v sphere get all clusters operation
+	VSphereGetAllClustersHandler VSphereGetAllClustersHandler
+	// VSphereGetAllDatacentersHandler sets the operation handler for the v sphere get all datacenters operation
+	VSphereGetAllDatacentersHandler VSphereGetAllDatacentersHandler
+	// VSphereGetAllDatastoresHandler sets the operation handler for the v sphere get all datastores operation
+	VSphereGetAllDatastoresHandler VSphereGetAllDatastoresHandler
 	// VSphereGetAllHostsSummaryHandler sets the operation handler for the v sphere get all hosts summary operation
 	VSphereGetAllHostsSummaryHandler VSphereGetAllHostsSummaryHandler
+	// VSphereGetAllNetworksHandler sets the operation handler for the v sphere get all networks operation
+	VSphereGetAllNetworksHandler VSphereGetAllNetworksHandler
+	// VSphereGetAllResourcePoolHandler sets the operation handler for the v sphere get all resource pool operation
+	VSphereGetAllResourcePoolHandler VSphereGetAllResourcePoolHandler
+	// VSphereGetAllStoragePodsHandler sets the operation handler for the v sphere get all storage pods operation
+	VSphereGetAllStoragePodsHandler VSphereGetAllStoragePodsHandler
 	// VSphereGetAllVMSummaryHandler sets the operation handler for the v sphere get all VM summary operation
 	VSphereGetAllVMSummaryHandler VSphereGetAllVMSummaryHandler
+	// VSphereGetHostByMoRefHandler sets the operation handler for the v sphere get host by mo ref operation
+	VSphereGetHostByMoRefHandler VSphereGetHostByMoRefHandler
+	// VSphereGetHostByNameHandler sets the operation handler for the v sphere get host by name operation
+	VSphereGetHostByNameHandler VSphereGetHostByNameHandler
 	// VSphereGetVMByMoRefHandler sets the operation handler for the v sphere get VM by mo ref operation
 	VSphereGetVMByMoRefHandler VSphereGetVMByMoRefHandler
 	// VSphereGetVMByNameHandler sets the operation handler for the v sphere get VM by name operation
@@ -201,14 +246,41 @@ func (o *VSphereAPI) Validate() error {
 	if o.SessionRegisterHandler == nil {
 		unregistered = append(unregistered, "SessionRegisterHandler")
 	}
+	if o.VSphereChangeVMPowerStateHandler == nil {
+		unregistered = append(unregistered, "VSphereChangeVMPowerStateHandler")
+	}
 	if o.VSphereConnectHandler == nil {
 		unregistered = append(unregistered, "VSphereConnectHandler")
+	}
+	if o.VSphereGetAllClustersHandler == nil {
+		unregistered = append(unregistered, "VSphereGetAllClustersHandler")
+	}
+	if o.VSphereGetAllDatacentersHandler == nil {
+		unregistered = append(unregistered, "VSphereGetAllDatacentersHandler")
+	}
+	if o.VSphereGetAllDatastoresHandler == nil {
+		unregistered = append(unregistered, "VSphereGetAllDatastoresHandler")
 	}
 	if o.VSphereGetAllHostsSummaryHandler == nil {
 		unregistered = append(unregistered, "VSphereGetAllHostsSummaryHandler")
 	}
+	if o.VSphereGetAllNetworksHandler == nil {
+		unregistered = append(unregistered, "VSphereGetAllNetworksHandler")
+	}
+	if o.VSphereGetAllResourcePoolHandler == nil {
+		unregistered = append(unregistered, "VSphereGetAllResourcePoolHandler")
+	}
+	if o.VSphereGetAllStoragePodsHandler == nil {
+		unregistered = append(unregistered, "VSphereGetAllStoragePodsHandler")
+	}
 	if o.VSphereGetAllVMSummaryHandler == nil {
 		unregistered = append(unregistered, "VSphereGetAllVMSummaryHandler")
+	}
+	if o.VSphereGetHostByMoRefHandler == nil {
+		unregistered = append(unregistered, "VSphereGetHostByMoRefHandler")
+	}
+	if o.VSphereGetHostByNameHandler == nil {
+		unregistered = append(unregistered, "VSphereGetHostByNameHandler")
 	}
 	if o.VSphereGetVMByMoRefHandler == nil {
 		unregistered = append(unregistered, "VSphereGetVMByMoRefHandler")
@@ -318,7 +390,23 @@ func (o *VSphereAPI) initHandlerCache() {
 	if o.handlers["POST"] == nil {
 		o.handlers["POST"] = make(map[string]http.Handler)
 	}
+	o.handlers["POST"]["/vsphere/{vcenter}/vm/{moref}/power"] = NewVSphereChangeVMPowerState(o.context, o.VSphereChangeVMPowerStateHandler)
+	if o.handlers["POST"] == nil {
+		o.handlers["POST"] = make(map[string]http.Handler)
+	}
 	o.handlers["POST"]["/vsphere/connect"] = NewVSphereConnect(o.context, o.VSphereConnectHandler)
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
+	o.handlers["GET"]["/vsphere/{vcenter}/cluster"] = NewVSphereGetAllClusters(o.context, o.VSphereGetAllClustersHandler)
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
+	o.handlers["GET"]["/vsphere/{vcenter}/datacenter"] = NewVSphereGetAllDatacenters(o.context, o.VSphereGetAllDatacentersHandler)
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
+	o.handlers["GET"]["/vsphere/{vcenter}/datastore"] = NewVSphereGetAllDatastores(o.context, o.VSphereGetAllDatastoresHandler)
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
@@ -326,11 +414,31 @@ func (o *VSphereAPI) initHandlerCache() {
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
+	o.handlers["GET"]["/vsphere/{vcenter}/network"] = NewVSphereGetAllNetworks(o.context, o.VSphereGetAllNetworksHandler)
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
+	o.handlers["GET"]["/vsphere/{vcenter}/resourcepool"] = NewVSphereGetAllResourcePool(o.context, o.VSphereGetAllResourcePoolHandler)
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
+	o.handlers["GET"]["/vsphere/{vcenter}/storagepod"] = NewVSphereGetAllStoragePods(o.context, o.VSphereGetAllStoragePodsHandler)
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
 	o.handlers["GET"]["/vsphere/{vcenter}/vm"] = NewVSphereGetAllVMSummary(o.context, o.VSphereGetAllVMSummaryHandler)
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
-	o.handlers["GET"]["/vsphere/{vcenter}/vm/moref/{moref}"] = NewVSphereGetVMByMoRef(o.context, o.VSphereGetVMByMoRefHandler)
+	o.handlers["GET"]["/vsphere/{vcenter}/host/ref/{moref}"] = NewVSphereGetHostByMoRef(o.context, o.VSphereGetHostByMoRefHandler)
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
+	o.handlers["GET"]["/vsphere/{vcenter}/host/name/{hostname}"] = NewVSphereGetHostByName(o.context, o.VSphereGetHostByNameHandler)
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
+	o.handlers["GET"]["/vsphere/{vcenter}/vm/ref/{moref}"] = NewVSphereGetVMByMoRef(o.context, o.VSphereGetVMByMoRefHandler)
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}

@@ -247,10 +247,198 @@ func init() {
         }
       }
     },
+    "/vsphere/{vcenter}/cluster": {
+      "get": {
+        "summary": "Gets the hosts found at the endpoint.",
+        "operationId": "vSphereGetAllClusters",
+        "parameters": [
+          {
+            "$ref": "#/parameters/VRSToken"
+          },
+          {
+            "$ref": "#/parameters/vCenter"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/ObjectCollectionResponse"
+          },
+          "400": {
+            "$ref": "#/responses/GeneralFailureResponse"
+          }
+        }
+      }
+    },
+    "/vsphere/{vcenter}/datacenter": {
+      "get": {
+        "summary": "Gets the datacenters.",
+        "operationId": "vSphereGetAllDatacenters",
+        "parameters": [
+          {
+            "$ref": "#/parameters/VRSToken"
+          },
+          {
+            "$ref": "#/parameters/vCenter"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/ObjectCollectionResponse"
+          },
+          "400": {
+            "$ref": "#/responses/GeneralFailureResponse"
+          }
+        }
+      }
+    },
+    "/vsphere/{vcenter}/datastore": {
+      "get": {
+        "summary": "Get a list of datastores",
+        "operationId": "vSphereGetAllDatastores",
+        "parameters": [
+          {
+            "$ref": "#/parameters/VRSToken"
+          },
+          {
+            "$ref": "#/parameters/vCenter"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/ObjectCollectionResponse"
+          },
+          "400": {
+            "$ref": "#/responses/GeneralFailureResponse"
+          }
+        }
+      }
+    },
     "/vsphere/{vcenter}/host": {
       "get": {
         "summary": "Gets the hosts found at the endpoint.",
         "operationId": "vSphereGetAllHostsSummary",
+        "parameters": [
+          {
+            "$ref": "#/parameters/VRSToken"
+          },
+          {
+            "$ref": "#/parameters/vCenter"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/ObjectCollectionResponse"
+          },
+          "400": {
+            "$ref": "#/responses/GeneralFailureResponse"
+          }
+        }
+      }
+    },
+    "/vsphere/{vcenter}/host/name/{hostname}": {
+      "get": {
+        "summary": "Retrieve full details from a Host by the name of the host.",
+        "operationId": "vSphereGetHostByName",
+        "parameters": [
+          {
+            "$ref": "#/parameters/VRSToken"
+          },
+          {
+            "$ref": "#/parameters/vCenter"
+          },
+          {
+            "$ref": "#/parameters/HostName"
+          },
+          {
+            "$ref": "#/parameters/SOAPProperties"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/ObjectCollectionResponse"
+          },
+          "400": {
+            "$ref": "#/responses/GeneralFailureResponse"
+          }
+        }
+      }
+    },
+    "/vsphere/{vcenter}/host/ref/{moref}": {
+      "get": {
+        "summary": "Retrieve full details from a Host by it's Managed Object Reference.",
+        "operationId": "vSphereGetHostByMoRef",
+        "parameters": [
+          {
+            "$ref": "#/parameters/VRSToken"
+          },
+          {
+            "$ref": "#/parameters/vCenter"
+          },
+          {
+            "$ref": "#/parameters/ManagedReference"
+          },
+          {
+            "$ref": "#/parameters/SOAPProperties"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/ObjectCollectionResponse"
+          },
+          "400": {
+            "$ref": "#/responses/GeneralFailureResponse"
+          }
+        }
+      }
+    },
+    "/vsphere/{vcenter}/network": {
+      "get": {
+        "summary": "Gets a list of networks",
+        "operationId": "vSphereGetAllNetworks",
+        "parameters": [
+          {
+            "$ref": "#/parameters/VRSToken"
+          },
+          {
+            "$ref": "#/parameters/vCenter"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/ObjectCollectionResponse"
+          },
+          "400": {
+            "$ref": "#/responses/GeneralFailureResponse"
+          }
+        }
+      }
+    },
+    "/vsphere/{vcenter}/resourcepool": {
+      "get": {
+        "summary": "Gets the hosts found at the endpoint.",
+        "operationId": "vSphereGetAllResourcePool",
+        "parameters": [
+          {
+            "$ref": "#/parameters/VRSToken"
+          },
+          {
+            "$ref": "#/parameters/vCenter"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/ObjectCollectionResponse"
+          },
+          "400": {
+            "$ref": "#/responses/GeneralFailureResponse"
+          }
+        }
+      }
+    },
+    "/vsphere/{vcenter}/storagepod": {
+      "get": {
+        "summary": "Gets the hosts found at the endpoint.",
+        "operationId": "vSphereGetAllStoragePods",
         "parameters": [
           {
             "$ref": "#/parameters/VRSToken"
@@ -337,36 +525,6 @@ func init() {
         }
       }
     },
-    "/vsphere/{vcenter}/vm/moref/{moref}": {
-      "get": {
-        "summary": "Retrieve a VM from a vCenter Server/ESXi host by it's Managed Object Reference.",
-        "operationId": "vSphereGetVMByMoRef",
-        "parameters": [
-          {
-            "$ref": "#/parameters/VRSToken"
-          },
-          {
-            "$ref": "#/parameters/vCenter"
-          },
-          {
-            "$ref": "#/parameters/ManagedReference"
-          },
-          {
-            "type": "boolean",
-            "name": "raw",
-            "in": "query"
-          }
-        ],
-        "responses": {
-          "200": {
-            "$ref": "#/responses/ObjectCollectionResponse"
-          },
-          "400": {
-            "$ref": "#/responses/GeneralFailureResponse"
-          }
-        }
-      }
-    },
     "/vsphere/{vcenter}/vm/name/{vmname}": {
       "get": {
         "summary": "Retrieve a VM from a vCenter Server/ESXi host.",
@@ -382,12 +540,77 @@ func init() {
             "$ref": "#/parameters/VirtualMachineName"
           },
           {
-            "$ref": "#/parameters/RawOutputToggle"
+            "$ref": "#/parameters/SOAPProperties"
           }
         ],
         "responses": {
           "200": {
             "$ref": "#/responses/ObjectCollectionResponse"
+          },
+          "400": {
+            "$ref": "#/responses/GeneralFailureResponse"
+          }
+        }
+      }
+    },
+    "/vsphere/{vcenter}/vm/ref/{moref}": {
+      "get": {
+        "summary": "Retrieve a VM from a vCenter Server/ESXi host by it's Managed Object Reference.",
+        "operationId": "vSphereGetVMByMoRef",
+        "parameters": [
+          {
+            "$ref": "#/parameters/VRSToken"
+          },
+          {
+            "$ref": "#/parameters/vCenter"
+          },
+          {
+            "$ref": "#/parameters/ManagedReference"
+          },
+          {
+            "$ref": "#/parameters/SOAPProperties"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/ObjectCollectionResponse"
+          },
+          "400": {
+            "$ref": "#/responses/GeneralFailureResponse"
+          }
+        }
+      }
+    },
+    "/vsphere/{vcenter}/vm/{moref}/power": {
+      "post": {
+        "summary": "Power actions on the VM.",
+        "operationId": "vSphereChangeVMPowerState",
+        "parameters": [
+          {
+            "$ref": "#/parameters/VRSToken"
+          },
+          {
+            "$ref": "#/parameters/vCenter"
+          },
+          {
+            "$ref": "#/parameters/ManagedReference"
+          },
+          {
+            "enum": [
+              "on",
+              "off",
+              "standby"
+            ],
+            "type": "string",
+            "description": "The desired power state.",
+            "name": "state",
+            "in": "query",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The power state change task has been initiated."
           },
           "400": {
             "$ref": "#/responses/GeneralFailureResponse"
@@ -421,6 +644,13 @@ func init() {
     }
   },
   "parameters": {
+    "HostName": {
+      "type": "string",
+      "description": "The name of the ESXi host",
+      "name": "hostname",
+      "in": "path",
+      "required": true
+    },
     "ManagedReference": {
       "type": "string",
       "description": "The Managed Object Reference for the Virtual Machine in the format (type-XXXX)",
@@ -428,9 +658,10 @@ func init() {
       "in": "path",
       "required": true
     },
-    "RawOutputToggle": {
-      "type": "boolean",
-      "name": "raw",
+    "SOAPProperties": {
+      "type": "string",
+      "description": "A comma-delimited list of the properties to retrieve from the VM.",
+      "name": "props",
       "in": "query"
     },
     "VRSToken": {
@@ -669,10 +900,316 @@ func init() {
         }
       }
     },
+    "/vsphere/{vcenter}/cluster": {
+      "get": {
+        "summary": "Gets the hosts found at the endpoint.",
+        "operationId": "vSphereGetAllClusters",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "VRS-Token",
+            "in": "header",
+            "required": true
+          },
+          {
+            "type": "string",
+            "description": "The nicename for the connection.",
+            "name": "vcenter",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful request. Returns JSON containing a count and the collection of objects.",
+            "schema": {
+              "$ref": "#/definitions/ObjectCollection"
+            }
+          },
+          "400": {
+            "description": "A general failure occured, more details are contained within the message.",
+            "schema": {
+              "$ref": "#/definitions/BadRequestError"
+            }
+          }
+        }
+      }
+    },
+    "/vsphere/{vcenter}/datacenter": {
+      "get": {
+        "summary": "Gets the datacenters.",
+        "operationId": "vSphereGetAllDatacenters",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "VRS-Token",
+            "in": "header",
+            "required": true
+          },
+          {
+            "type": "string",
+            "description": "The nicename for the connection.",
+            "name": "vcenter",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful request. Returns JSON containing a count and the collection of objects.",
+            "schema": {
+              "$ref": "#/definitions/ObjectCollection"
+            }
+          },
+          "400": {
+            "description": "A general failure occured, more details are contained within the message.",
+            "schema": {
+              "$ref": "#/definitions/BadRequestError"
+            }
+          }
+        }
+      }
+    },
+    "/vsphere/{vcenter}/datastore": {
+      "get": {
+        "summary": "Get a list of datastores",
+        "operationId": "vSphereGetAllDatastores",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "VRS-Token",
+            "in": "header",
+            "required": true
+          },
+          {
+            "type": "string",
+            "description": "The nicename for the connection.",
+            "name": "vcenter",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful request. Returns JSON containing a count and the collection of objects.",
+            "schema": {
+              "$ref": "#/definitions/ObjectCollection"
+            }
+          },
+          "400": {
+            "description": "A general failure occured, more details are contained within the message.",
+            "schema": {
+              "$ref": "#/definitions/BadRequestError"
+            }
+          }
+        }
+      }
+    },
     "/vsphere/{vcenter}/host": {
       "get": {
         "summary": "Gets the hosts found at the endpoint.",
         "operationId": "vSphereGetAllHostsSummary",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "VRS-Token",
+            "in": "header",
+            "required": true
+          },
+          {
+            "type": "string",
+            "description": "The nicename for the connection.",
+            "name": "vcenter",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful request. Returns JSON containing a count and the collection of objects.",
+            "schema": {
+              "$ref": "#/definitions/ObjectCollection"
+            }
+          },
+          "400": {
+            "description": "A general failure occured, more details are contained within the message.",
+            "schema": {
+              "$ref": "#/definitions/BadRequestError"
+            }
+          }
+        }
+      }
+    },
+    "/vsphere/{vcenter}/host/name/{hostname}": {
+      "get": {
+        "summary": "Retrieve full details from a Host by the name of the host.",
+        "operationId": "vSphereGetHostByName",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "VRS-Token",
+            "in": "header",
+            "required": true
+          },
+          {
+            "type": "string",
+            "description": "The nicename for the connection.",
+            "name": "vcenter",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "description": "The name of the ESXi host",
+            "name": "hostname",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "description": "A comma-delimited list of the properties to retrieve from the VM.",
+            "name": "props",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful request. Returns JSON containing a count and the collection of objects.",
+            "schema": {
+              "$ref": "#/definitions/ObjectCollection"
+            }
+          },
+          "400": {
+            "description": "A general failure occured, more details are contained within the message.",
+            "schema": {
+              "$ref": "#/definitions/BadRequestError"
+            }
+          }
+        }
+      }
+    },
+    "/vsphere/{vcenter}/host/ref/{moref}": {
+      "get": {
+        "summary": "Retrieve full details from a Host by it's Managed Object Reference.",
+        "operationId": "vSphereGetHostByMoRef",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "VRS-Token",
+            "in": "header",
+            "required": true
+          },
+          {
+            "type": "string",
+            "description": "The nicename for the connection.",
+            "name": "vcenter",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "description": "The Managed Object Reference for the Virtual Machine in the format (type-XXXX)",
+            "name": "moref",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "description": "A comma-delimited list of the properties to retrieve from the VM.",
+            "name": "props",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful request. Returns JSON containing a count and the collection of objects.",
+            "schema": {
+              "$ref": "#/definitions/ObjectCollection"
+            }
+          },
+          "400": {
+            "description": "A general failure occured, more details are contained within the message.",
+            "schema": {
+              "$ref": "#/definitions/BadRequestError"
+            }
+          }
+        }
+      }
+    },
+    "/vsphere/{vcenter}/network": {
+      "get": {
+        "summary": "Gets a list of networks",
+        "operationId": "vSphereGetAllNetworks",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "VRS-Token",
+            "in": "header",
+            "required": true
+          },
+          {
+            "type": "string",
+            "description": "The nicename for the connection.",
+            "name": "vcenter",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful request. Returns JSON containing a count and the collection of objects.",
+            "schema": {
+              "$ref": "#/definitions/ObjectCollection"
+            }
+          },
+          "400": {
+            "description": "A general failure occured, more details are contained within the message.",
+            "schema": {
+              "$ref": "#/definitions/BadRequestError"
+            }
+          }
+        }
+      }
+    },
+    "/vsphere/{vcenter}/resourcepool": {
+      "get": {
+        "summary": "Gets the hosts found at the endpoint.",
+        "operationId": "vSphereGetAllResourcePool",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "VRS-Token",
+            "in": "header",
+            "required": true
+          },
+          {
+            "type": "string",
+            "description": "The nicename for the connection.",
+            "name": "vcenter",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful request. Returns JSON containing a count and the collection of objects.",
+            "schema": {
+              "$ref": "#/definitions/ObjectCollection"
+            }
+          },
+          "400": {
+            "description": "A general failure occured, more details are contained within the message.",
+            "schema": {
+              "$ref": "#/definitions/BadRequestError"
+            }
+          }
+        }
+      }
+    },
+    "/vsphere/{vcenter}/storagepod": {
+      "get": {
+        "summary": "Gets the hosts found at the endpoint.",
+        "operationId": "vSphereGetAllStoragePods",
         "parameters": [
           {
             "type": "string",
@@ -750,53 +1287,6 @@ func init() {
         }
       }
     },
-    "/vsphere/{vcenter}/vm/moref/{moref}": {
-      "get": {
-        "summary": "Retrieve a VM from a vCenter Server/ESXi host by it's Managed Object Reference.",
-        "operationId": "vSphereGetVMByMoRef",
-        "parameters": [
-          {
-            "type": "string",
-            "name": "VRS-Token",
-            "in": "header",
-            "required": true
-          },
-          {
-            "type": "string",
-            "description": "The nicename for the connection.",
-            "name": "vcenter",
-            "in": "path",
-            "required": true
-          },
-          {
-            "type": "string",
-            "description": "The Managed Object Reference for the Virtual Machine in the format (type-XXXX)",
-            "name": "moref",
-            "in": "path",
-            "required": true
-          },
-          {
-            "type": "boolean",
-            "name": "raw",
-            "in": "query"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful request. Returns JSON containing a count and the collection of objects.",
-            "schema": {
-              "$ref": "#/definitions/ObjectCollection"
-            }
-          },
-          "400": {
-            "description": "A general failure occured, more details are contained within the message.",
-            "schema": {
-              "$ref": "#/definitions/BadRequestError"
-            }
-          }
-        }
-      }
-    },
     "/vsphere/{vcenter}/vm/name/{vmname}": {
       "get": {
         "summary": "Retrieve a VM from a vCenter Server/ESXi host.",
@@ -823,8 +1313,9 @@ func init() {
             "required": true
           },
           {
-            "type": "boolean",
-            "name": "raw",
+            "type": "string",
+            "description": "A comma-delimited list of the properties to retrieve from the VM.",
+            "name": "props",
             "in": "query"
           }
         ],
@@ -834,6 +1325,105 @@ func init() {
             "schema": {
               "$ref": "#/definitions/ObjectCollection"
             }
+          },
+          "400": {
+            "description": "A general failure occured, more details are contained within the message.",
+            "schema": {
+              "$ref": "#/definitions/BadRequestError"
+            }
+          }
+        }
+      }
+    },
+    "/vsphere/{vcenter}/vm/ref/{moref}": {
+      "get": {
+        "summary": "Retrieve a VM from a vCenter Server/ESXi host by it's Managed Object Reference.",
+        "operationId": "vSphereGetVMByMoRef",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "VRS-Token",
+            "in": "header",
+            "required": true
+          },
+          {
+            "type": "string",
+            "description": "The nicename for the connection.",
+            "name": "vcenter",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "description": "The Managed Object Reference for the Virtual Machine in the format (type-XXXX)",
+            "name": "moref",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "description": "A comma-delimited list of the properties to retrieve from the VM.",
+            "name": "props",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful request. Returns JSON containing a count and the collection of objects.",
+            "schema": {
+              "$ref": "#/definitions/ObjectCollection"
+            }
+          },
+          "400": {
+            "description": "A general failure occured, more details are contained within the message.",
+            "schema": {
+              "$ref": "#/definitions/BadRequestError"
+            }
+          }
+        }
+      }
+    },
+    "/vsphere/{vcenter}/vm/{moref}/power": {
+      "post": {
+        "summary": "Power actions on the VM.",
+        "operationId": "vSphereChangeVMPowerState",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "VRS-Token",
+            "in": "header",
+            "required": true
+          },
+          {
+            "type": "string",
+            "description": "The nicename for the connection.",
+            "name": "vcenter",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "description": "The Managed Object Reference for the Virtual Machine in the format (type-XXXX)",
+            "name": "moref",
+            "in": "path",
+            "required": true
+          },
+          {
+            "enum": [
+              "on",
+              "off",
+              "standby"
+            ],
+            "type": "string",
+            "description": "The desired power state.",
+            "name": "state",
+            "in": "query",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The power state change task has been initiated."
           },
           "400": {
             "description": "A general failure occured, more details are contained within the message.",
@@ -950,6 +1540,13 @@ func init() {
     }
   },
   "parameters": {
+    "HostName": {
+      "type": "string",
+      "description": "The name of the ESXi host",
+      "name": "hostname",
+      "in": "path",
+      "required": true
+    },
     "ManagedReference": {
       "type": "string",
       "description": "The Managed Object Reference for the Virtual Machine in the format (type-XXXX)",
@@ -957,9 +1554,10 @@ func init() {
       "in": "path",
       "required": true
     },
-    "RawOutputToggle": {
-      "type": "boolean",
-      "name": "raw",
+    "SOAPProperties": {
+      "type": "string",
+      "description": "A comma-delimited list of the properties to retrieve from the VM.",
+      "name": "props",
       "in": "query"
     },
     "VRSToken": {

@@ -13,6 +13,7 @@ require (
 	github.com/go-openapi/validate v0.22.1
 	github.com/google/uuid v1.3.0
 	github.com/jessevdk/go-flags v1.5.0
+	github.com/kardianos/service v1.2.2
 	github.com/vmware/govmomi v0.30.6
 	golang.org/x/net v0.12.0
 )

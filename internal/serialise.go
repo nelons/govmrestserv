@@ -4,11 +4,12 @@ import (
 	"errors"
 	"fmt"
 	"reflect"
+	"strings"
 
 	"github.com/Jeffail/gabs/v2"
 )
 
-func serialise_object(obj any, current *gabs.Container) (*gabs.Container, error) {
+func serialise_object(obj any, current *gabs.Container, props []string) (*gabs.Container, error) {
 	var objData *gabs.Container
 
 	v := reflect.ValueOf(obj)
@@ -38,8 +39,33 @@ func serialise_object(obj any, current *gabs.Container) (*gabs.Container, error)
 		ft := t.Field(i)
 		fv := v.Field(i)
 
+		var child_props []string
+
+		if len(props) > 0 {
+			matched := false
+			for i := 0; i < len(props); i++ {
+				// Only match up to the first . (eg. so we match against summary instead of summary.runtime)
+				// TODO: pass this through to the object to only return specified children (e.g. only summary.runtime and not the whole object)
+				var propname string
+				index := strings.Index(props[i], ".")
+				if index == -1 {
+					propname = props[i]
+				} else {
+					propname = props[i][0:index]
+				}
+
+				if strings.EqualFold(propname, ft.Name) {
+					matched = true
+				}
+			}
+
+			if !matched {
+				continue
+			}
+		}
+
 		if fv.Kind() == reflect.Struct && ft.Anonymous {
-			serialise_object(fv.Interface(), objData)
+			serialise_object(fv.Interface(), objData, child_props)
 
 		} else {
 			serialise_value(objData, fv, ft.Type, ft.Name)
@@ -88,7 +114,7 @@ func serialise_value(objData *gabs.Container, fv reflect.Value, ft reflect.Type,
 		objData.Set(uint64(fv.Uint()), field_name)
 
 	case reflect.Struct:
-		child, err := serialise_object(fv.Interface(), nil)
+		child, err := serialise_object(fv.Interface(), nil, []string{})
 		if err == nil {
 			objData.Set(child, field_name)
 
@@ -157,7 +183,7 @@ func serialise_value(objData *gabs.Container, fv reflect.Value, ft reflect.Type,
 
 				case reflect.Struct:
 					child := fv.Index(k).Interface()
-					child_json, err := serialise_object(child, nil)
+					child_json, err := serialise_object(child, nil, []string{})
 					if err == nil {
 						objData.ArrayAppend(child_json, field_name)
 					}
@@ -192,7 +218,7 @@ func serialise_value(objData *gabs.Container, fv reflect.Value, ft reflect.Type,
 
 					// We only write structs here !
 					//child, err := serialise_interface_json(iv)
-					child, err := serialise_object(iv, nil)
+					child, err := serialise_object(iv, nil, []string{})
 					if err == nil {
 						objData.ArrayAppend(child, field_name)
 					}
@@ -215,7 +241,7 @@ func serialise_value(objData *gabs.Container, fv reflect.Value, ft reflect.Type,
 				//pv := reflect.Indirect(fv)
 
 				if it.Kind() == reflect.Ptr {
-					child, _ := serialise_object(iv, nil)
+					child, _ := serialise_object(iv, nil, []string{})
 					if child != nil {
 						objData.Set(child, field_name)
 					}

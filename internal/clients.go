@@ -148,7 +148,7 @@ func registerClientvCenterConnection(client *client_session, vc_url, username st
 					}
 
 					// Change desired name to something unique and go again
-					desired_name = base_name + string(number)
+					desired_name = base_name + fmt.Sprint(number)
 					number++
 				}
 
