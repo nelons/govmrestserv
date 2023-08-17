@@ -42,7 +42,7 @@ type VSphereGetHostByNameParams struct {
 	  In: path
 	*/
 	Hostname string
-	/*A comma-delimited list of the properties to retrieve from the VM.
+	/*A comma-delimited list of the properties to retrieve from the VM. This is case-sensitive to the properties in the SOAP object.
 	  In: query
 	*/
 	Props *string

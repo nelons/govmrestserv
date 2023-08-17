@@ -1,0 +1,5 @@
+2023/08/17 13:00:02 Server starting.
+2023/08/17 13:00:02 Serving v sphere at https://[::]:8443
+2023/08/17 13:00:07 http: TLS handshake error from [::1]:63149: EOF
+2023/08/17 13:00:07 Session registered from [::1]:63150 with token 869edf8e-5477-46e5-b351-96e46274ba91.
+2023/08/17 15:20:47 Session registered from [::1]:50204 with token 61b916f4-f06b-4448-ac6a-a59d44fb3447.

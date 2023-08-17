@@ -9,6 +9,34 @@ import (
 	"github.com/Jeffail/gabs/v2"
 )
 
+/*
+Leaving this here though unused.
+This is for testing serialising objects but restricting to only fields we care about.
+*/
+func Test_GetObjectFields(obj any) {
+	v := reflect.ValueOf(obj)
+	t := reflect.TypeOf(obj)
+
+	if t.Kind() == reflect.Ptr {
+		v = reflect.Indirect(v)
+		t = v.Type()
+	}
+
+	field_count := t.NumField()
+
+	for i := 0; i < field_count; i++ {
+		ft := t.Field(i)
+		fv := v.Field(i)
+
+		if fv.Kind() == reflect.Struct && ft.Anonymous {
+			Test_GetObjectFields(fv.Interface())
+
+		} else {
+			fmt.Printf("- %v\n", ft.Name)
+		}
+	}
+}
+
 func serialise_object(obj any, current *gabs.Container, props []string) (*gabs.Container, error) {
 	var objData *gabs.Container
 
@@ -39,37 +67,35 @@ func serialise_object(obj any, current *gabs.Container, props []string) (*gabs.C
 		ft := t.Field(i)
 		fv := v.Field(i)
 
-		var child_props []string
-
-		if len(props) > 0 {
-			matched := false
-			for i := 0; i < len(props); i++ {
-				// Only match up to the first . (eg. so we match against summary instead of summary.runtime)
-				// TODO: pass this through to the object to only return specified children (e.g. only summary.runtime and not the whole object)
-				var propname string
-				index := strings.Index(props[i], ".")
-				if index == -1 {
-					propname = props[i]
-				} else {
-					propname = props[i][0:index]
-				}
-
-				if strings.EqualFold(propname, ft.Name) {
-					matched = true
-				}
-			}
-
-			if !matched {
-				continue
-			}
-		}
-
 		if fv.Kind() == reflect.Struct && ft.Anonymous {
-			serialise_object(fv.Interface(), objData, child_props)
+			serialise_object(fv.Interface(), objData, props)
 
 		} else {
-			serialise_value(objData, fv, ft.Type, ft.Name)
+			if len(props) > 0 {
+				matched := false
+				for i := 0; i < len(props); i++ {
+					// Only match up to the first . (eg. so we match against summary instead of summary.runtime)
+					// TODO: pass this through to the object to only return specified children (e.g. only summary.runtime and not the whole object)
+					var propname string
+					index := strings.Index(props[i], ".")
+					if index == -1 {
+						propname = props[i]
+					} else {
+						propname = props[i][0:index]
+					}
 
+					if strings.EqualFold(propname, ft.Name) {
+						matched = true
+						break
+					}
+				}
+
+				if !matched {
+					continue
+				}
+			}
+
+			serialise_value(objData, fv, ft.Type, ft.Name)
 		}
 	}
 

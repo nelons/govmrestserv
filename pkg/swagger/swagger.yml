@@ -237,39 +237,10 @@ paths:
       parameters:
         - $ref: '#/parameters/VRSToken'
         - $ref: '#/parameters/vCenter'
+        - $ref: '#/parameters/SOAPProperties'
       responses:
         '200':
-          description: Success
-          schema:
-            type: object
-            properties:
-              count:
-                type: integer
-              results:
-                type: array
-                items:
-                  type: object
-                  properties:
-                    moref:
-                      type: string
-                    name:
-                      type: string
-                    hardwareVersion:
-                      type: string
-                    powerstate:
-                      type: string
-                    cpu:
-                      type: integer
-                    memoryMB:
-                      type: integer
-                    numberDisks:
-                      type: integer
-                    numberNICs:
-                      type: integer
-                    guestFullName:
-                      type: string
-                    status:
-                      type: string
+          $ref: '#/responses/ObjectCollectionResponse'
         '400':
           $ref: '#/responses/GeneralFailureResponse'            
 

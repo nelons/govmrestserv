@@ -16,6 +16,8 @@ import (
 type VSphereGetAllVMSummaryURL struct {
 	Vcenter string
 
+	Props *string
+
 	_basePath string
 	// avoid unkeyed usage
 	_ struct{}
@@ -51,6 +53,18 @@ func (o *VSphereGetAllVMSummaryURL) Build() (*url.URL, error) {
 
 	_basePath := o._basePath
 	_result.Path = golangswaggerpaths.Join(_basePath, _path)
+
+	qs := make(url.Values)
+
+	var propsQ string
+	if o.Props != nil {
+		propsQ = *o.Props
+	}
+	if propsQ != "" {
+		qs.Set("props", propsQ)
+	}
+
+	_result.RawQuery = qs.Encode()
 
 	return &_result, nil
 }

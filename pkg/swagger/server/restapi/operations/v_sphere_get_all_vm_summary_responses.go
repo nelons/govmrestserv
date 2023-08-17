@@ -17,7 +17,7 @@ import (
 const VSphereGetAllVMSummaryOKCode int = 200
 
 /*
-VSphereGetAllVMSummaryOK Success
+VSphereGetAllVMSummaryOK Successful request. Returns JSON containing a count and the collection of objects.
 
 swagger:response vSphereGetAllVmSummaryOK
 */
@@ -26,7 +26,7 @@ type VSphereGetAllVMSummaryOK struct {
 	/*
 	  In: Body
 	*/
-	Payload *VSphereGetAllVMSummaryOKBody `json:"body,omitempty"`
+	Payload *models.ObjectCollection `json:"body,omitempty"`
 }
 
 // NewVSphereGetAllVMSummaryOK creates VSphereGetAllVMSummaryOK with default headers values
@@ -36,13 +36,13 @@ func NewVSphereGetAllVMSummaryOK() *VSphereGetAllVMSummaryOK {
 }
 
 // WithPayload adds the payload to the v sphere get all Vm summary o k response
-func (o *VSphereGetAllVMSummaryOK) WithPayload(payload *VSphereGetAllVMSummaryOKBody) *VSphereGetAllVMSummaryOK {
+func (o *VSphereGetAllVMSummaryOK) WithPayload(payload *models.ObjectCollection) *VSphereGetAllVMSummaryOK {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the v sphere get all Vm summary o k response
-func (o *VSphereGetAllVMSummaryOK) SetPayload(payload *VSphereGetAllVMSummaryOKBody) {
+func (o *VSphereGetAllVMSummaryOK) SetPayload(payload *models.ObjectCollection) {
 	o.Payload = payload
 }
 

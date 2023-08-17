@@ -51,38 +51,22 @@ func get_vsphere_get_vms(user operations.VSphereGetAllVMSummaryParams) middlewar
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
+	var props []string
+	if user.Props != nil {
+		props = strings.Split(*user.Props, ",")
+	}
+
 	//vms, err := vcenter_getvms_summary(vc.client, ctx)
 	var vms []mo.VirtualMachine
-	err = vcenter_get_objects(vc.client, ctx, ObjectType_VirtualMachine, []string{"summary"}, &vms)
+	err = vcenter_get_objects(vc.client, ctx, ObjectType_VirtualMachine, props, &vms)
 	if err != nil {
 		body := create_badrequesterror(err.Error())
 		return operations.NewVSphereGetAllVMSummaryBadRequest().WithPayload(&body)
 	}
 
-	out := make([]*operations.VSphereGetAllVMSummaryOKBodyResultsItems0, len(vms))
-	for i := 0; i < len(vms); i++ {
-		vm := vms[i]
-		var item operations.VSphereGetAllVMSummaryOKBodyResultsItems0
-
-		item.Name = vm.Summary.Config.Name
-		item.CPU = int64(vm.Summary.Config.NumCpu)
-		item.MemoryMB = int64(vm.Summary.Config.MemorySizeMB)
-		item.Powerstate = string(vm.Summary.Runtime.PowerState)
-		item.Moref = vm.Self.String()
-		item.HardwareVersion = vm.Summary.Config.HwVersion
-		item.NumberDisks = int64(vm.Summary.Config.NumVirtualDisks)
-		item.NumberNICs = int64(vm.Summary.Config.NumEthernetCards)
-		item.GuestFullName = vm.Summary.Config.GuestFullName
-		item.Status = string(vm.Summary.OverallStatus)
-
-		out[i] = &item
-	}
-
-	var body operations.VSphereGetAllVMSummaryOKBody
-	body.Count = int64(len(vms))
-	body.Results = out
-
-	return operations.NewVSphereGetAllVMSummaryOK().WithPayload(&body)
+	return middleware.ResponderFunc(func(rw http.ResponseWriter, p runtime.Producer) {
+		write_virtualmachines(vms, props, rw)
+	})
 }
 
 func get_vsphere_get_vm_byname(user operations.VSphereGetVMByNameParams) middleware.Responder {

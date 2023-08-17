@@ -12,6 +12,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/Jeffail/gabs/v2"
 	"github.com/go-openapi/loads"
 	"github.com/go-openapi/runtime/middleware"
 	"github.com/jessevdk/go-flags"
@@ -136,7 +137,27 @@ func InitialiseServer() error {
 	return nil
 }
 
+var ticker *time.Ticker
+var quit chan struct{}
+
 func StartServer() {
+	ticker = time.NewTicker(time.Duration(60) * time.Second)
+	quit = make(chan struct{})
+	go func() {
+		for {
+			select {
+			case <-ticker.C:
+				// do stuff
+				checkClientConnections()
+
+			case <-quit:
+				ticker.Stop()
+				return
+			}
+		}
+	}()
+
+	log.Println("Server starting.")
 	if err := server.Serve(); err != nil {
 		log.Fatalln(err)
 	}
@@ -147,6 +168,8 @@ func ShutdownServer() {
 	if err != nil {
 		log.Fatalln(err)
 	}
+
+	close(quit)
 }
 
 func Test_PrintObject(obj any) {
@@ -154,6 +177,25 @@ func Test_PrintObject(obj any) {
 	if err == nil {
 		fmt.Printf("%v\n", string(prettyJSON))
 	}
+}
+
+/*
+This tests the serialisation output function
+and should not output unrequested values.
+*/
+func Test_OutputObject(obj any, props []string) {
+	fmt.Printf("Outputing properties: %v\n", props)
+
+	jsonObj := gabs.New()
+
+	objData, err := serialise_object(obj, nil, props)
+
+	if err == nil {
+		jsonObj.Set(objData)
+	}
+
+	out := jsonObj.String()
+	fmt.Printf("%v\n", out)
 }
 
 func TestServer(vcenter_sdk, username, password string) {
@@ -325,6 +367,20 @@ func TestServer(vcenter_sdk, username, password string) {
 
 				}
 			}
+
+			// Get some VM properties.
+			vm_position = rand.Intn(max_vms - 1)
+			vm = all_vms[vm_position]
+			vms = nil
+
+			fmt.Println("Testing serialisation of a VM with explicitly requested properties.")
+			props := []string{"Self", "alarmActionsEnabled", "name"}
+			err = vcenter_get_object_byref(client, ctx, ObjectType_VirtualMachine, vm.Self.Value, props, &vms)
+			if err == nil {
+				if len(vms) == 1 {
+					Test_OutputObject(vms[0], props)
+				}
+			}
 		}
 
 	} else {
@@ -342,6 +398,8 @@ func post_session_register(user operations.SessionRegisterParams) middleware.Res
 		error_body.Error = err.Error()
 		return operations.NewSessionRegisterInternalServerError().WithPayload(&error_body)
 	}
+
+	log.Printf("Session registered from %v with token %v.\n", user.HTTPRequest.RemoteAddr, client.Token)
 
 	var ok_body operations.SessionRegisterOKBody
 	ok_body.Token = client.Token

@@ -467,57 +467,14 @@ func init() {
           },
           {
             "$ref": "#/parameters/vCenter"
+          },
+          {
+            "$ref": "#/parameters/SOAPProperties"
           }
         ],
         "responses": {
           "200": {
-            "description": "Success",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "count": {
-                  "type": "integer"
-                },
-                "results": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "cpu": {
-                        "type": "integer"
-                      },
-                      "guestFullName": {
-                        "type": "string"
-                      },
-                      "hardwareVersion": {
-                        "type": "string"
-                      },
-                      "memoryMB": {
-                        "type": "integer"
-                      },
-                      "moref": {
-                        "type": "string"
-                      },
-                      "name": {
-                        "type": "string"
-                      },
-                      "numberDisks": {
-                        "type": "integer"
-                      },
-                      "numberNICs": {
-                        "type": "integer"
-                      },
-                      "powerstate": {
-                        "type": "string"
-                      },
-                      "status": {
-                        "type": "string"
-                      }
-                    }
-                  }
-                }
-              }
-            }
+            "$ref": "#/responses/ObjectCollectionResponse"
           },
           "400": {
             "$ref": "#/responses/GeneralFailureResponse"
@@ -660,7 +617,7 @@ func init() {
     },
     "SOAPProperties": {
       "type": "string",
-      "description": "A comma-delimited list of the properties to retrieve from the VM.",
+      "description": "A comma-delimited list of the properties to retrieve from the VM. This is case-sensitive to the properties in the SOAP object.",
       "name": "props",
       "in": "query"
     },
@@ -1067,7 +1024,7 @@ func init() {
           },
           {
             "type": "string",
-            "description": "A comma-delimited list of the properties to retrieve from the VM.",
+            "description": "A comma-delimited list of the properties to retrieve from the VM. This is case-sensitive to the properties in the SOAP object.",
             "name": "props",
             "in": "query"
           }
@@ -1115,7 +1072,7 @@ func init() {
           },
           {
             "type": "string",
-            "description": "A comma-delimited list of the properties to retrieve from the VM.",
+            "description": "A comma-delimited list of the properties to retrieve from the VM. This is case-sensitive to the properties in the SOAP object.",
             "name": "props",
             "in": "query"
           }
@@ -1258,24 +1215,19 @@ func init() {
             "name": "vcenter",
             "in": "path",
             "required": true
+          },
+          {
+            "type": "string",
+            "description": "A comma-delimited list of the properties to retrieve from the VM. This is case-sensitive to the properties in the SOAP object.",
+            "name": "props",
+            "in": "query"
           }
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "Successful request. Returns JSON containing a count and the collection of objects.",
             "schema": {
-              "type": "object",
-              "properties": {
-                "count": {
-                  "type": "integer"
-                },
-                "results": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/definitions/ResultsItems0"
-                  }
-                }
-              }
+              "$ref": "#/definitions/ObjectCollection"
             }
           },
           "400": {
@@ -1314,7 +1266,7 @@ func init() {
           },
           {
             "type": "string",
-            "description": "A comma-delimited list of the properties to retrieve from the VM.",
+            "description": "A comma-delimited list of the properties to retrieve from the VM. This is case-sensitive to the properties in the SOAP object.",
             "name": "props",
             "in": "query"
           }
@@ -1362,7 +1314,7 @@ func init() {
           },
           {
             "type": "string",
-            "description": "A comma-delimited list of the properties to retrieve from the VM.",
+            "description": "A comma-delimited list of the properties to retrieve from the VM. This is case-sensitive to the properties in the SOAP object.",
             "name": "props",
             "in": "query"
           }
@@ -1458,41 +1410,6 @@ func init() {
         }
       }
     },
-    "ResultsItems0": {
-      "type": "object",
-      "properties": {
-        "cpu": {
-          "type": "integer"
-        },
-        "guestFullName": {
-          "type": "string"
-        },
-        "hardwareVersion": {
-          "type": "string"
-        },
-        "memoryMB": {
-          "type": "integer"
-        },
-        "moref": {
-          "type": "string"
-        },
-        "name": {
-          "type": "string"
-        },
-        "numberDisks": {
-          "type": "integer"
-        },
-        "numberNICs": {
-          "type": "integer"
-        },
-        "powerstate": {
-          "type": "string"
-        },
-        "status": {
-          "type": "string"
-        }
-      }
-    },
     "SessionListOKBodyItems0": {
       "type": "object",
       "properties": {
@@ -1556,7 +1473,7 @@ func init() {
     },
     "SOAPProperties": {
       "type": "string",
-      "description": "A comma-delimited list of the properties to retrieve from the VM.",
+      "description": "A comma-delimited list of the properties to retrieve from the VM. This is case-sensitive to the properties in the SOAP object.",
       "name": "props",
       "in": "query"
     },

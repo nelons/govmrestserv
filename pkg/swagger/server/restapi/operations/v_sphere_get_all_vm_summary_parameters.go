@@ -9,6 +9,7 @@ import (
 	"net/http"
 
 	"github.com/go-openapi/errors"
+	"github.com/go-openapi/runtime"
 	"github.com/go-openapi/runtime/middleware"
 	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/validate"
@@ -36,6 +37,10 @@ type VSphereGetAllVMSummaryParams struct {
 	  In: header
 	*/
 	VRSToken string
+	/*A comma-delimited list of the properties to retrieve from the VM. This is case-sensitive to the properties in the SOAP object.
+	  In: query
+	*/
+	Props *string
 	/*The nicename for the connection.
 	  Required: true
 	  In: path
@@ -52,7 +57,14 @@ func (o *VSphereGetAllVMSummaryParams) BindRequest(r *http.Request, route *middl
 
 	o.HTTPRequest = r
 
+	qs := runtime.Values(r.URL.Query())
+
 	if err := o.bindVRSToken(r.Header[http.CanonicalHeaderKey("VRS-Token")], true, route.Formats); err != nil {
+		res = append(res, err)
+	}
+
+	qProps, qhkProps, _ := qs.GetOK("props")
+	if err := o.bindProps(qProps, qhkProps, route.Formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -82,6 +94,24 @@ func (o *VSphereGetAllVMSummaryParams) bindVRSToken(rawData []string, hasKey boo
 		return err
 	}
 	o.VRSToken = raw
+
+	return nil
+}
+
+// bindProps binds and validates parameter Props from query.
+func (o *VSphereGetAllVMSummaryParams) bindProps(rawData []string, hasKey bool, formats strfmt.Registry) error {
+	var raw string
+	if len(rawData) > 0 {
+		raw = rawData[len(rawData)-1]
+	}
+
+	// Required: false
+	// AllowEmptyValue: false
+
+	if raw == "" { // empty values pass all other validations
+		return nil
+	}
+	o.Props = &raw
 
 	return nil
 }

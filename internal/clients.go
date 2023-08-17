@@ -3,6 +3,7 @@ package internal
 import (
 	"errors"
 	"fmt"
+	"log"
 	"net/url"
 	"strings"
 	"sync"
@@ -24,6 +25,34 @@ type client_session struct {
 // Slice containing our active clients
 var clients []client_session
 var clients_mutex sync.Mutex
+
+func checkClientConnections() {
+	clients_mutex.Lock()
+
+	// From:
+	// https://stackoverflow.com/questions/20545743/how-to-remove-items-from-a-slice-while-ranging-over-it
+	// This leaks memory until the slice is garbage collected ... so not ideal.
+
+	index := 0
+	for i := 0; i < len(clients); i++ {
+		c := &clients[i]
+
+		// check if the c.LastAccess + timeout value is later than now
+		interval := time.Since(c.LastAccess)
+		if interval.Minutes() > 60 {
+			// if so, remove from the clients slice
+			log.Printf("Client connection from host %v with token %v has timed-out due to inactivity.\n", c.Host, c.Token)
+			continue
+
+		}
+
+		clients[index] = *c
+		index++
+	}
+	clients = clients[:index]
+
+	clients_mutex.Unlock()
+}
 
 func parseRequestAddress(host string) string {
 	// Parse the source IP

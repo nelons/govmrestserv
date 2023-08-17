@@ -5,10 +5,14 @@ import (
 	"fmt"
 	"log"
 	"net/url"
+	"os"
+	"path/filepath"
 
 	"github.com/kardianos/service"
 	"github.com/nelons/vsphere-rest-server/internal"
 )
+
+var logFile *os.File
 
 type program struct{}
 
@@ -31,6 +35,8 @@ func (p *program) run() {
 func (p *program) Stop(s service.Service) error {
 	// Stop should not block. Return with a few seconds.
 	internal.ShutdownServer()
+	logFile.Close()
+	logFile = nil
 	return nil
 }
 
@@ -77,6 +83,7 @@ func main() {
 		err := internal.InitialiseServer()
 		if err == nil {
 			internal.StartServer()
+			internal.ShutdownServer()
 		}
 		return
 	}
@@ -89,6 +96,26 @@ func main() {
 		DisplayName: "vSphere REST Server",
 		Description: "Marshalls SOAP requests to multiple vCenter/ESXi servers and returns data as REST",
 	}
+
+	var logpath string
+	app_path, err := os.Executable()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	/*
+		TODO: implement log cycling.
+	*/
+
+	logpath = filepath.Dir(app_path)
+	logpath += "\\vsphere-rest-server-service.log"
+
+	logFile, err := os.OpenFile(logpath, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0644)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	log.SetOutput(logFile)
 
 	prg := &program{}
 	s, err := service.New(prg, svcConfig)
@@ -125,8 +152,17 @@ func main() {
 		return
 	}
 
+	/*
+		So we get here if the service is being started, but there are no command arguments.
+		But not sure if the logging file is closed ..
+	*/
 	err = s.Run()
 	if err != nil {
 		log.Fatalln(err)
+	}
+
+	if logFile != nil {
+		logFile.Close()
+		logFile = nil
 	}
 }
